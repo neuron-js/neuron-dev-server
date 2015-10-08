@@ -19,6 +19,16 @@ $ npm install neuron-dev-server --save
 var neuron_dev_server = require('neuron-dev-server');
 ```
 
+
+### http://localhost:<port>/neuron.js
+
+npm: neuronjs
+
+require('neuronjs').content(callback);
+
+### http://localhost:<port>/config.js
+
+
 ## License
 
 MIT
