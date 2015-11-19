@@ -10,3 +10,5 @@
     - refresh the page if any javascript file changes
     - connect to dev server to receive reload signals
   - restful api to let other modules to tell dev server if any file changes.
+
+- reverse proxy
