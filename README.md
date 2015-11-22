@@ -19,9 +19,14 @@ $ npm install neuron-dev-server --save
 #### For example, in conjunction with Express
 
 ```js
+var middleware = require('neuron-dev-server');
+
 var options = {
   routers: [
     {
+      // defines it as default
+      default: true,
+
       // If the `req.url` matches `location`
       location: '/mod',
 
@@ -34,6 +39,11 @@ var options = {
       // If by_pass not specified, then `next()` will be called
     },
 
+    {
+      location: '/static',
+      root: '/path/to/static'
+    },
+
     ...
   ],
 
@@ -42,14 +52,17 @@ var options = {
 };
 
 
-var middleware = require('neuron-dev-server')(options);
 var app = require('express')();
 
 app
   // Use neuron-dev-server middleware for express
-  .use(neuron)
+  .use(middleware(options))
   .listen(8000);
 ```
+
+### middleware.options(options)
+
+Static method to clean the `options`.
 
 ## License
 
