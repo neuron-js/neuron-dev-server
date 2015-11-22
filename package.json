@@ -1,7 +1,7 @@
 {
   "name": "neuron-dev-server",
   "version": "1.0.0",
-  "description": "neuron-dev-server",
+  "description": "neuron-dev-server is a static file server and reverse proxy.",
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec ./test/*.js"
@@ -12,7 +12,10 @@
   },
   "keywords": [
     "neuron",
-    "dev-server"
+    "dev-server",
+    "static",
+    "server",
+    "reverse-proxy"
   ],
   "engines": {
     "node": ">=0.10.0"
@@ -27,6 +30,8 @@
     "chai": "*"
   },
   "dependencies": {
+    "parseurl": "^1.3.0",
+    "request": "^2.67.0",
     "send": "^0.13.0"
   }
 }

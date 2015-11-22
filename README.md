@@ -32,7 +32,9 @@ var options = {
       by_pass: 'http://domain.com/mod'
 
       // If by_pass not specified, then `next()` will be called
-    }
+    },
+
+    ...
   ]
 };
 
