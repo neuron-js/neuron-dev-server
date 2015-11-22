@@ -35,7 +35,10 @@ var options = {
     },
 
     ...
-  ]
+  ],
+
+  // All requests will be fallback to:
+  by_pass: 'http://domain.com'
 };
 
 

@@ -14,6 +14,8 @@ var parse_url = require('parseurl');
 
 
 function dev (options) {
+  return middleware;
+
   function middleware (req, res, next) {
     var router;
     options.routers.some(function (r) {
@@ -26,10 +28,16 @@ function dev (options) {
       return next();
     }
 
-    var pathname = parse_url(req.url).pathname.replace(router.location.length);
+    var parsed = parse_url(req);
+    var pathname = parsed.pathname.replace(router.location.length);
 
     // TODO: check if req.url has queries
     var filename = node_path.join(router.root, pathname);
+
+    function by_pass (pathname, to) {
+      var url = node_url.resolve(to, pathname);
+      request(url).pipe(res);
+    }
 
     fs.exists(filename, function (exists) {
       if (exists) {
@@ -39,16 +47,22 @@ function dev (options) {
       }
 
       if (!router.by_pass) {
-        return next();
+        if (!options.by_pass) {
+          return next();
+        }
+
+        // by pass the original pathname
+        return by_pass(parsed.path);
       }
 
-      var url = node_url.resolve(router.by_pass, pathname);
-      request(url).pipe(res);
+      // by pass the replaced pathname
+      by_pass(pathname + parsed.search, router.by_pass);
     });
   }
 }
 
 
+// @param {path} base_root, the base root to solve paths with
 function clean_options (options, base_root) {
   options = options || {};
   options.routers = options.routers || [];
@@ -68,12 +82,17 @@ function clean_options (options, base_root) {
       if (router.by_pass) {
         // `url.resolve` is different with `path.resolve`,
         // make sure there is a slash at the end
-        router.by_pass = router.by_pass.replace(/\/*$/, '/');
+        router.by_pass = make_sure_trailing_slash(router.by_pass);
       }
       
       return router;
     })
     .filter(Boolean);
+
+    // default by_pass
+    if (options.by_pass) {
+      options.by_pass = make_sure_trailing_slash(options.by_pass);
+    }
 
   return options;
 }
@@ -85,4 +104,9 @@ function clean_path (path) {
     .replace(/^\/*/, '/')
     // '/mod' -> '/mod/', so that it will not match '/module'
     .replace(/\/*$/, '/');
+}
+
+
+function make_sure_trailing_slash (str) {
+  return str.replace(/\/*$/, '/');
 }
