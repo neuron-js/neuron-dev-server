@@ -6,13 +6,7 @@
 
 # neuron-dev-server
 
-Neuron dev server for static files, with smart resource reloading enabled.
-
-neuron-dev-server is initially intent for `neuron.js`, but it is a completely isolated and standalone module, which could be used for any projects.
-
-**Features:**
-
-- livereload
+neuron-dev-server is a static file server and reverse proxy.
 
 ## Install
 
@@ -25,22 +19,32 @@ $ npm install neuron-dev-server --save
 #### For example, in conjunction with Express
 
 ```js
-var middleware = require('neuron-dev-server');
-var neuron = middleware(options);
+var options = {
+  routers: [
+    {
+      // If the `req.url` matches `location`
+      location: '/mod',
 
+      // Then we will search the static file from
+      root: '/path/to/mod',
+      
+      // If not found, then bypass to:
+      by_pass: 'http://domain.com/mod'
+
+      // If by_pass not specified, then `next()` will be called
+    }
+  ]
+};
+
+
+var middleware = require('neuron-dev-server')(options);
 var app = require('express')();
-// Use neuron-dev-server middleware for express
-app.use(neuron)
 
-var server = require('http').createServer(app);
-// Attaches reload socket tunnel to the http server
-neuron.attach(server);
-
-server.listen(8000);
+app
+  // Use neuron-dev-server middleware for express
+  .use(neuron)
+  .listen(8000);
 ```
-
-- **options** `Object`, a sample configuration, see 'sample.neuron.config.js.server'
-
 
 ## License
 
