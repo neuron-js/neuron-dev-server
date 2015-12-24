@@ -12,58 +12,28 @@ var request = require('request');
 // memoized url.parse
 var parse_url = require('parseurl');
 var make_array = require('make-array');
+var router = require('neuron-router')
 
 
 function dev (options) {
   return middleware;
 
   function middleware (req, res, next) {
-    var router;
-    var parsed = parse_url(req);
+    var parsed = parse_url(req)
+    var pathname = parsed.pathname
 
-    function _next () {
-      if (!options.by_pass) {
-        return next();
+    router.route(pathname, options, function (filename, fallback_url) {
+      if (filename) {
+        res.sendFile(filename)
+        return
       }
 
-      // Default fallback
-      by_pass(parsed.path, options.by_pass);
-    }
-
-    options.routers.some(function (r) {
-      if (parsed.pathname.indexOf(r.location) === 0) {
-        router = r;
-        return true;
-      }
-    });
-
-    if (!router) {
-      return _next();
-    }
-
-    var pathname = parsed.pathname.slice(router.location.length);
-    // TODO: check if req.url has queries
-    var filename = node_path.join(router.root, pathname);
-
-    function by_pass (pathname, to) {
-      var url = node_url.resolve(to, pathname);
-      request(url).pipe(res);
-    }
-
-    fs.exists(filename, function (exists) {
-      if (exists) {
-        return send(req, pathname, {
-          root: router.root
-        }).pipe(res);
+      if (fallback_url) {
+        return request(fallback_url).pipe(res)
       }
 
-      if (!router.by_pass) {
-        return _next();
-      }
-
-      // by pass the replaced pathname
-      by_pass(pathname + parsed.search, router.by_pass);
-    });
+      next()
+    })
   }
 }
 
