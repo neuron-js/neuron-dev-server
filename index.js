@@ -11,6 +11,7 @@ var send = require('send');
 var request = require('request');
 // memoized url.parse
 var parse_url = require('parseurl');
+var make_array = require('make-array');
 
 
 function dev (options) {
@@ -81,9 +82,12 @@ function clean_options (options, base_root) {
       }
 
       router.location = clean_path(router.location);
+      router.root = make_array(router.root)
 
       if (base_root) {
-        router.root = node_path.resolve(base_root, router.root);
+        router.root = router.root.map(function (r) {
+          return node_path.resolve(base_root, r)
+        })
       }
 
       if (router.by_pass) {
