@@ -1,6 +1,6 @@
 {
   "name": "neuron-dev-server",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "neuron-dev-server is a static file server and reverse proxy.",
   "main": "index.js",
   "scripts": {

@@ -19,10 +19,6 @@ function dev (options) {
     var parsed = parse_url(req)
     var pathname = parsed.pathname
 
-    if (!middleware.router) {
-      middleware.router = router(options)
-    }
-
     middleware.router.route(pathname, function (filename, fallback_url) {
       if (filename) {
         res.sendFile(filename)
@@ -35,6 +31,10 @@ function dev (options) {
 
       next()
     })
+  }
+
+  if (!middleware.router) {
+    middleware.router = router(options)
   }
 
   return middleware
