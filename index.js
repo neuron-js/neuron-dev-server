@@ -26,7 +26,15 @@ function dev (options) {
       }
 
       if (fallback_url) {
-        return request(fallback_url).pipe(res)
+        return request(fallback_url).on('error', function (e) {
+          console.warn(
+            'Neuron dev server: fails to fallback to "'
+            + fallback_url
+            + '": \n'
+            + (e.stack || e.message || e)
+          )
+
+        }).pipe(res)
       }
 
       next()
