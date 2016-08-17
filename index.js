@@ -25,19 +25,28 @@ function dev (options) {
         return
       }
 
-      if (fallback_url) {
-        return request(fallback_url).on('error', function (e) {
-          console.warn(
-            'Neuron dev server: fails to fallback to "'
-            + fallback_url
-            + '": \n'
-            + (e.stack || e.message || e)
-          )
-
-        }).pipe(res)
+      if (!fallback_url) {
+        return next()
       }
 
-      next()
+      const headers = Object.assign({}, req.headers)
+      const host = node_url.parse(fallback_url).host
+      headers.host = host
+
+      const options = {
+        url: fallback_url,
+        headers
+      }
+
+      request(options).on('error', function (e) {
+        console.warn(
+          'Neuron dev server: fails to fallback to "'
+          + fallback_url
+          + '": \n'
+          + (e.stack || e.message || e)
+        )
+
+      }).pipe(res)
     })
   }
 
