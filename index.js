@@ -11,7 +11,7 @@ var request = require('request')
 // memoized url.parse
 var parse_url = require('parseurl')
 var make_array = require('make-array')
-var router = require('neuron-router')
+var Nginx = require('engine-x')
 
 
 function dev (options) {
@@ -19,7 +19,7 @@ function dev (options) {
     var parsed = parse_url(req)
     var pathname = parsed.pathname
 
-    middleware.router.route(pathname, function (filename, fallback_url) {
+    middleware.router.route({pathname}, function (filename, fallback_url) {
       if (filename) {
         res.sendFile(filename)
         return
@@ -51,7 +51,7 @@ function dev (options) {
   }
 
   if (!middleware.router) {
-    middleware.router = router(options)
+    middleware.router = new Nginx(options)
   }
 
   return middleware
