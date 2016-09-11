@@ -11,7 +11,7 @@ var request = require('request')
 // memoized url.parse
 var parse_url = require('parseurl')
 var make_array = require('make-array')
-var Nginx = require('engine-x')
+var Router = require('engine-x').Router
 
 
 function dev (options) {
@@ -19,39 +19,41 @@ function dev (options) {
     var parsed = parse_url(req)
     var pathname = parsed.pathname
 
-    middleware.router.route({pathname}, function (filename, fallback_url) {
-      if (filename) {
+    middleware.router
+      .route({pathname})
+      .on('found', (filename) => {
         res.sendFile(filename)
-        return
-      }
+      })
+      .on('not-found', () => {
+        next()
+      })
+      .on('error', (e) => {
+        res.status(500).send(e.message || 'Internal Server Error.')
+      })
+      .on('proxy-pass', (url) => {
+        const headers = Object.assign({}, req.headers)
+        const host = node_url.parse(url).host
+        headers.host = host
 
-      if (!fallback_url) {
-        return next()
-      }
+        const options = {
+          url,
+          headers
+        }
 
-      const headers = Object.assign({}, req.headers)
-      const host = node_url.parse(fallback_url).host
-      headers.host = host
+        request(options).on('error', function (e) {
+          console.warn(
+            'Neuron dev server: fails to fallback to "'
+            + url
+            + '": \n'
+            + (e.stack || e.message || e)
+          )
+        }).pipe(res)
 
-      const options = {
-        url: fallback_url,
-        headers
-      }
-
-      request(options).on('error', function (e) {
-        console.warn(
-          'Neuron dev server: fails to fallback to "'
-          + fallback_url
-          + '": \n'
-          + (e.stack || e.message || e)
-        )
-
-      }).pipe(res)
-    })
+      })
   }
 
   if (!middleware.router) {
-    middleware.router = new Nginx(options)
+    middleware.router = new Router(options)
   }
 
   return middleware
